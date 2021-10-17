@@ -270,6 +270,19 @@ int daw_render(int argc, char** argv){
     STARGATE->sample_count = f_buffer_size;
 
     v_daw_offline_render_prep(DAW);
+    if(f_create_file){
+        // Play the project all the way through one time to eliminate
+        // oscillator phase syncing
+        v_daw_offline_render(
+            DAW,
+            f_start_beat,
+            f_end_beat,
+            f_output_file,
+            0,
+            f_stem_render,
+            sequence_uid
+        );
+    }
 
     v_daw_offline_render(
         DAW,

@@ -131,20 +131,20 @@ void v_daw_offline_render(
     }
 
 #ifdef __linux__
+    if(a_create_file){
+        clock_gettime(CLOCK_REALTIME, &f_finish);
+        SGFLT f_elapsed = (SGFLT)v_print_benchmark(
+            "v_daw_offline_render", f_start, f_finish);
+        SGFLT f_realtime = f_sample_count / f_sample_rate;
 
-    clock_gettime(CLOCK_REALTIME, &f_finish);
-    SGFLT f_elapsed = (SGFLT)v_print_benchmark(
-        "v_daw_offline_render", f_start, f_finish);
-    SGFLT f_realtime = f_sample_count / f_sample_rate;
+        printf("Realtime: %f\n", f_realtime);
 
-    printf("Realtime: %f\n", f_realtime);
-
-    if(f_elapsed > 0.0f){
-        printf("Ratio:  %f : 1\n\n", f_realtime / f_elapsed);
-    } else {
-        printf("Ratio:  infinity : 1");
+        if(f_elapsed > 0.0f){
+            printf("Ratio:  %f : 1\n\n", f_realtime / f_elapsed);
+        } else {
+            printf("Ratio:  infinity : 1");
+        }
     }
-
 #endif
 
     v_daw_set_playback_mode(self, PLAYBACK_MODE_OFF, a_start_beat, 0);
@@ -158,11 +158,6 @@ void v_daw_offline_render(
 
     sf_close(f_sndfile);
 
-    free(f_buffer[0]);
-    free(f_buffer[1]);
-    free(f_buffer);
-    free(f_output);
-
     char f_tmp_finished[1024];
 
     if(a_stem){
@@ -174,6 +169,11 @@ void v_daw_offline_render(
     v_write_to_file(f_tmp_finished, "finished");
 
     v_daw_panic(self);  //ensure all notes are off before returning
+
+    free(f_buffer[0]);
+    free(f_buffer[1]);
+    free(f_buffer);
+    free(f_output);
 
     pthread_spin_lock(&STARGATE->main_lock);
     STARGATE->is_offline_rendering = 0;
